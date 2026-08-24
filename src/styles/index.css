@@ -43,6 +43,16 @@ body {
   background-size: 140px 140px;
 }
 
+@keyframes eq {
+  0%,
+  100% {
+    height: 3px;
+  }
+  50% {
+    height: 11px;
+  }
+}
+
 @keyframes float-up {
   from {
     transform: translateY(0);
@@ -107,6 +117,64 @@ input[type="range"].scrub::-moz-range-track {
   height: 4px;
   border-radius: 999px;
   background: rgba(243, 233, 221, 0.18);
+}
+
+/* thin seek strip pinned to the top edge of the compact player bar */
+input[type="range"].scrub-thin {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 4px;
+  margin: 0;
+  border-radius: 0;
+  background: linear-gradient(
+    to right,
+    rgb(var(--accent)) 0%,
+    rgb(var(--accent)) var(--fill, 0%),
+    rgba(243, 233, 221, 0.14) var(--fill, 0%),
+    rgba(243, 233, 221, 0.14) 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"].scrub-thin::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 10px;
+  width: 10px;
+  border-radius: 999px;
+  background: #f3e9dd;
+  border: 2px solid rgb(var(--accent));
+  margin-top: -3px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+input[type="range"].scrub-thin:hover::-webkit-slider-thumb,
+input[type="range"].scrub-thin:focus-visible::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+input[type="range"].scrub-thin::-moz-range-thumb {
+  height: 10px;
+  width: 10px;
+  border-radius: 999px;
+  background: #f3e9dd;
+  border: 2px solid rgb(var(--accent));
+  cursor: pointer;
+  opacity: 0;
+}
+
+input[type="range"].scrub-thin:hover::-moz-range-thumb,
+input[type="range"].scrub-thin:focus-visible::-moz-range-thumb {
+  opacity: 1;
+}
+
+input[type="range"].scrub-thin::-moz-range-track {
+  height: 4px;
+  background: transparent;
 }
 
 /* thin scrollbar for the settings panel */

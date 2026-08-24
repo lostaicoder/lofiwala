@@ -79,8 +79,6 @@ export default function App() {
     }
   }
 
-  const activePlaylist = playlists.find((p) => p.id === activePlaylistId);
-
   return (
     <>
       <BackgroundLayer settings={background} />
@@ -95,7 +93,6 @@ export default function App() {
         shuffle={player.shuffle}
         loop={player.loop}
         errorMessage={player.errorMessage}
-        playlistLabel={activePlaylist?.label ?? "lofiwala"}
         hasStarted={hasStarted}
         onTogglePlay={handleTogglePlay}
         onNext={player.next}
