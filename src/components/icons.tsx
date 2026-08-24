@@ -168,6 +168,28 @@ export function TrashIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function EnterFullscreenIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 9V4.5h4.5" />
+      <path d="M19.5 9V4.5H15" />
+      <path d="M4 15v4.5h4.5" />
+      <path d="M19.5 15v4.5H15" />
+    </svg>
+  );
+}
+
+export function ExitFullscreenIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M9 4.5V9H4.5" />
+      <path d="M15 4.5V9h4.5" />
+      <path d="M9 19.5V15H4.5" />
+      <path d="M15 19.5V15h4.5" />
+    </svg>
+  );
+}
+
 export function CheckIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...props}>

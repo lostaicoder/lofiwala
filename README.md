@@ -15,7 +15,13 @@ color, volume) is stored only in their own browser via `localStorage` and
   YouTube / YouTube Music playlist. The player itself is invisible; only the
   audio plays. Defaults to the playlist you gave me.
 - **Custom playlists** — anyone can paste another YouTube/YT Music playlist
-  link in Settings, name it, and switch between saved playlists.
+  link in Settings, name it, and switch between saved playlists. Links
+  copied straight from YouTube Music (which prefix the ID with `VL`) are
+  normalized automatically, and private lists (Liked Music, Watch Later)
+  are called out with a clear message instead of failing silently.
+- **Full screen** — a toggle (top-right, or press `F`) puts the whole page
+  into the browser's full-screen mode, so the background — animated,
+  image, or video loop — fills the entire screen with no browser chrome.
 - **Background** — a default ambient animated gradient (drifting color
   blobs, a light dust-mote drift, subtle film grain, respects
   `prefers-reduced-motion`), or a user-supplied image/video, either pasted as
@@ -93,6 +99,10 @@ their own playlist locally.
   server. It only affects `npm run dev` on an untrusted network and has no
   effect on the deployed production build, which is static files with no
   dev server involved.
-- Some YouTube "radio mix" playlists (IDs starting with `RD`) occasionally
-  restrict embedding for a track; the player automatically skips any track
-  that fails to load rather than getting stuck.
+- If a playlist is entirely private (Liked Music, Watch Later) or otherwise
+  can't be embedded, the player shows a clear message rather than hanging
+  silently. Individual unplayable tracks within an otherwise-good playlist
+  are skipped automatically.
+- Full screen requires a direct click or key press to activate — this is a
+  browser security requirement, not something the app can bypass — so it
+  can't be turned on automatically when the page loads.

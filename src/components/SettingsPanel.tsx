@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { AccentKey, BackgroundMode, BackgroundSettings, PlaylistEntry } from "../types";
-import { extractPlaylistId, isLikelyYouTubeUrl } from "../lib/youtube";
+import { extractPlaylistId, isLikelyYouTubeUrl, isPrivatePlaylistId } from "../lib/youtube";
 import { BG_IMAGE_KEY, BG_VIDEO_KEY, idbDeleteBlob, idbSetBlob } from "../lib/idb";
 import { MAX_UPLOAD_BYTES } from "../lib/storage";
 import { ACCENTS } from "../lib/accent";
@@ -71,6 +71,10 @@ export function SettingsPanel({
           ? "That link doesn't include a playlist. Open the playlist itself, then copy its URL."
           : "Paste a YouTube or YouTube Music playlist link (or its ID).",
       );
+      return;
+    }
+    if (isPrivatePlaylistId(id)) {
+      setPlaylistError("Liked Music and Watch Later are private — YouTube won't let those be embedded. Try a regular public playlist link.");
       return;
     }
     const existing = playlists.find((p) => p.id === id);

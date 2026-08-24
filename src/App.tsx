@@ -3,7 +3,8 @@ import { BackgroundLayer } from "./components/BackgroundLayer";
 import { Branding } from "./components/Branding";
 import { Player } from "./components/Player";
 import { SettingsPanel } from "./components/SettingsPanel";
-import { SettingsIcon } from "./components/icons";
+import { EnterFullscreenIcon, ExitFullscreenIcon, SettingsIcon } from "./components/icons";
+import { useFullscreen } from "./hooks/useFullscreen";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { useYouTubePlayer } from "./hooks/useYouTubePlayer";
 import { applyAccent } from "./lib/accent";
@@ -27,6 +28,7 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const initialVolumeRef = useRef(volume);
+  const fullscreen = useFullscreen();
 
   useEffect(() => {
     applyAccent(accent);
@@ -43,15 +45,20 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player.volume]);
 
-  // Space toggles play/pause, unless focus is on a text field or the panel is open.
+  // Space toggles play/pause, "f" toggles full screen — unless focus is on
+  // a text field or the settings panel is open.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.code !== "Space") return;
       const target = e.target as HTMLElement | null;
       const tag = target?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || settingsOpen) return;
-      e.preventDefault();
-      handleTogglePlay();
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        handleTogglePlay();
+      } else if (e.key === "f" || e.key === "F") {
+        if (fullscreen.isSupported) fullscreen.toggle();
+      }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -104,14 +111,30 @@ export default function App() {
         onCycleLoop={player.cycleLoop}
       />
 
-      <button
-        type="button"
-        onClick={() => setSettingsOpen(true)}
-        aria-label="Open settings"
-        className="fixed right-4 top-4 sm:right-5 sm:top-5 z-30 grid h-9 w-9 place-items-center rounded-full text-mist/55 hover:text-mist hover:bg-mist/10 transition-colors"
-      >
-        <SettingsIcon width={18} height={18} />
-      </button>
+      <div className="fixed right-3 top-3 z-30 flex items-center gap-1 sm:right-5 sm:top-5">
+        {fullscreen.isSupported && (
+          <button
+            type="button"
+            onClick={fullscreen.toggle}
+            aria-label={fullscreen.isFullscreen ? "Exit full screen" : "Enter full screen"}
+            className="grid h-9 w-9 place-items-center rounded-full text-mist/55 transition-colors hover:bg-mist/10 hover:text-mist"
+          >
+            {fullscreen.isFullscreen ? (
+              <ExitFullscreenIcon width={17} height={17} />
+            ) : (
+              <EnterFullscreenIcon width={17} height={17} />
+            )}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => setSettingsOpen(true)}
+          aria-label="Open settings"
+          className="grid h-9 w-9 place-items-center rounded-full text-mist/55 transition-colors hover:bg-mist/10 hover:text-mist"
+        >
+          <SettingsIcon width={18} height={18} />
+        </button>
+      </div>
 
       <SettingsPanel
         open={settingsOpen}

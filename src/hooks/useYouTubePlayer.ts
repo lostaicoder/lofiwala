@@ -38,6 +38,8 @@ export function useYouTubePlayer({ playlistId, initialVolume }: UseYouTubePlayer
   const hostRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<any>(null);
   const pollRef = useRef<number | null>(null);
+  const loadTimeoutRef = useRef<number | null>(null);
+  const errorStreakRef = useRef(0);
   const shuffleRef = useRef(false);
   const loopRef = useRef<LoopMode>("off");
   const mountedPlaylistRef = useRef<string | null>(null);
@@ -79,6 +81,24 @@ export function useYouTubePlayer({ playlistId, initialVolume }: UseYouTubePlayer
     }
   }, []);
 
+  const clearLoadTimeout = useCallback(() => {
+    if (loadTimeoutRef.current) {
+      window.clearTimeout(loadTimeoutRef.current);
+      loadTimeoutRef.current = null;
+    }
+  }, []);
+
+  // Safety net: some invalid or unembeddable playlist IDs never fire any
+  // player event at all — the player just sits there silently. Without
+  // this, the UI would be stuck on "Tuning in…" forever with no feedback.
+  const armLoadTimeout = useCallback(() => {
+    clearLoadTimeout();
+    loadTimeoutRef.current = window.setTimeout(() => {
+      setErrorMessage("This playlist didn't load — double-check the link, or make sure the playlist is public.");
+      setStatus((s) => (s === "loading" ? "paused" : s));
+    }, 12000);
+  }, [clearLoadTimeout]);
+
   const startPoll = useCallback(() => {
     clearPoll();
     pollRef.current = window.setInterval(() => {
@@ -101,7 +121,8 @@ export function useYouTubePlayer({ playlistId, initialVolume }: UseYouTubePlayer
       const data = p.getVideoData?.();
       const idx = p.getPlaylistIndex?.();
       const list = p.getPlaylist?.();
-      if (data) {
+      if (data?.video_id) {
+        clearLoadTimeout();
         setNow({
           videoId: data.video_id ?? "",
           title: data.title || "",
@@ -113,7 +134,7 @@ export function useYouTubePlayer({ playlistId, initialVolume }: UseYouTubePlayer
     } catch {
       // ignore
     }
-  }, []);
+  }, [clearLoadTimeout]);
 
   const attachEvents = useCallback(
     (player: any) => {
@@ -123,6 +144,7 @@ export function useYouTubePlayer({ playlistId, initialVolume }: UseYouTubePlayer
           case YTns.PlayerState.PLAYING:
             setStatus("playing");
             setErrorMessage(null);
+            errorStreakRef.current = 0;
             refreshNowPlaying();
             startPoll();
             break;
@@ -150,6 +172,13 @@ export function useYouTubePlayer({ playlistId, initialVolume }: UseYouTubePlayer
 
       player.addEventListener("onError", () => {
         // 2: bad param, 5: html5 error, 100: not found, 101/150: embedding disabled
+        errorStreakRef.current += 1;
+        if (errorStreakRef.current > 5) {
+          clearLoadTimeout();
+          setErrorMessage("This playlist doesn't seem to be playable — try a different link.");
+          setStatus("error");
+          return;
+        }
         setErrorMessage("That track can't be played here — skipping ahead.");
         try {
           player.nextVideo();
@@ -158,13 +187,14 @@ export function useYouTubePlayer({ playlistId, initialVolume }: UseYouTubePlayer
         }
       });
     },
-    [clearPoll, refreshNowPlaying, startPoll],
+    [clearLoadTimeout, clearPoll, refreshNowPlaying, startPoll],
   );
 
   // (Re)initialize or re-target the player whenever the playlist changes.
   useEffect(() => {
     let cancelled = false;
     setErrorMessage(null);
+    errorStreakRef.current = 0;
 
     loadYouTubeIframeApi().then(() => {
       if (cancelled || !hostRef.current) return;
@@ -172,6 +202,7 @@ export function useYouTubePlayer({ playlistId, initialVolume }: UseYouTubePlayer
       if (playerRef.current && mountedPlaylistRef.current) {
         try {
           setStatus("loading");
+          armLoadTimeout();
           playerRef.current.loadPlaylist({ list: playlistId, listType: "playlist", index: 0 });
           playerRef.current.setShuffle(shuffleRef.current);
           mountedPlaylistRef.current = playlistId;
@@ -182,6 +213,7 @@ export function useYouTubePlayer({ playlistId, initialVolume }: UseYouTubePlayer
       }
 
       setStatus("loading");
+      armLoadTimeout();
       playerRef.current = new window.YT.Player(hostRef.current, {
         height: "2",
         width: "2",
@@ -220,6 +252,7 @@ export function useYouTubePlayer({ playlistId, initialVolume }: UseYouTubePlayer
   useEffect(() => {
     return () => {
       clearPoll();
+      clearLoadTimeout();
       try {
         playerRef.current?.destroy();
       } catch {
