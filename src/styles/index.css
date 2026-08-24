@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --accent: 232 149 107; /* ember, as r g b for use in rgb(var(--accent)) */
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #1b1330;
+  color: #f3e9dd;
+  font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(232, 149, 107, 0.35);
+  color: #f3e9dd;
+}
+
+/* Keep default browser focus rings sensible but on-brand. */
+:focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.noise-bg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+
+@keyframes float-up {
+  from {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.7;
+  }
+  90% {
+    opacity: 0.5;
+  }
+  to {
+    transform: translateY(-100vh);
+    opacity: 0;
+  }
+}
+
+/* ---- custom range sliders (progress + volume) ---- */
+input[type="range"].scrub {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    rgb(var(--accent)) 0%,
+    rgb(var(--accent)) var(--fill, 0%),
+    rgba(243, 233, 221, 0.18) var(--fill, 0%),
+    rgba(243, 233, 221, 0.18) 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"].scrub::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 13px;
+  width: 13px;
+  border-radius: 999px;
+  background: #f3e9dd;
+  border: 2px solid rgb(var(--accent));
+  margin-top: -4.5px;
+  transition: transform 0.15s ease;
+}
+
+input[type="range"].scrub::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+input[type="range"].scrub::-moz-range-thumb {
+  height: 13px;
+  width: 13px;
+  border-radius: 999px;
+  background: #f3e9dd;
+  border: 2px solid rgb(var(--accent));
+  cursor: pointer;
+}
+
+input[type="range"].scrub::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(243, 233, 221, 0.18);
+}
+
+/* thin scrollbar for the settings panel */
+.thin-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: rgba(243, 233, 221, 0.2);
+  border-radius: 999px;
+}
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(243, 233, 221, 0.25) transparent;
+}
